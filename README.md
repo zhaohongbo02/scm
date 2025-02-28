@@ -1,99 +1,118 @@
 # SCM
 
-## 程序架构
-![image](./figures/scm框架_11261627.png)
+## Run it
+### 1. Get the code
 
-### 前端
-负责各组件的布局和图像渲染
+First, you need to get the code for this project from the Git repository. Please follow the steps below:
 
-### 后端
-负责绘制bokeh图像传给前端，向前端提供数据
+#### 1.1 Clone the project code
 
-## TODO
+If you have not installed Git yet, please download and install Git from the Git official website.
 
-1. 设计一个选择共享机制，在图中可以直接选择点，在表格中可以直接选择行，对应的索引可以反映在图像上，但是在图中选择点并不会反映在表格上。此外，在表格中选择的行索引在取消后也不会反映在图中，及添加动作同步，删除动作不同步。因此，需要设计一个共享/同步机制。
+Use the following command to clone the project code:
 
-2. 在后端绘制分层网络图，在前端渲染出来。
+``` sh
+git clone https://github.com/zhaohongbo02/scm.git
+```
 
-3. 企业数据处理、读入问题。如何从企业数据处理得到程序的输入，企业数据不包含供应商的经纬度。
+#### 1.2 Enter the project directory
 
-4. 目前上下游供应链的实现在逻辑上还存在问题
+After cloning successfully, enter the project directory:
+``` sh
+cd scm
+```
+
+### 2. Configure Python virtual environment
+
+To ensure that your Python environment is consistent with the project's dependencies, it is recommended to use a virtual environment. Here are the steps to configure a Python virtual environment:
+
+#### 2.1 Create a virtual environment
+
+If you have Python 3 and the venv module installed (most modern versions of Python come with venv), you can create a virtual environment with the following command:
+
+python3 -m venv venv
+
+This will create a virtual environment called venv in the project directory.
+
+#### 2.2 Activate the virtual environment
+
+Depending on the operating system you are using, the way to activate the virtual environment varies:
+
+- Windows:
+``` sh
+.\venv\Scripts\activate
+```
+- MacOS/Linux:
+``` sh
+source venv/bin/activate
+```
+After activation, the command line prompt will change to show the name of the virtual environment currently in use.
+
+#### 2.3 Install dependencies
+
+After the virtual environment is activated, use the requirements.txt file to install all project dependencies:
+
+``` sh
+pip install -r requirements.txt
+```
+
+This will install the libraries required by the project based on all the dependencies listed in requirements.txt.
+
+### 3. Start the program
+
+Once the program is configured, you can start the project with the following steps.
+
+#### 3.1 Start the project
+
+``` sh
+cd backend
+python app.py
+```
+
+#### 3.2 Access the application
+
+After starting, by default, you can view the application by accessing the following address through the browser:
+
+http://127.0.0.1:5000/
+
+### 4. Stop the program
+
+If you need to stop the running program, you can press Ctrl + C in the command line to terminate the process.
 
 
-## 数据模型
+## Program Framework
+![image](./figures/scmFramework.png)
 
-### 1. SupplyChain 数据模型
-| **字段名称**          | **数据类型**              | **是否必填** |
+## Data Models
+
+### 1. SupplyChain
+| **Field Name**          | **Data Type**              | **Required** |
 |-----------------------|---------------------------|--------------|
-| id                    | db.Integer               | 是           |
-| name                  | db.String(80)            | 是           |
-| created_at            | db.DateTime              | 是（默认当前时间） |
-| updated_at            | db.DateTime              | 是（默认更新时的时间） |
-| nodes                 | db.Integer              | 是，默认为0  |
-| edges                 | db.Integer              | 是，默认为0  |
-| has_latlon           | db.Boolean               | 是，默认为False |
-| has_layer            | db.Boolean               | 是，默认为False |
+| id                    | db.Integer               | YES (Primary Key)|
+| name                  | db.String(80)            | YES           |
+| created_at            | db.DateTime              | YES (Default current time)|
+| updated_at            | db.DateTime              | YES（Default update time） |
+| nodes                 | db.Integer              | YES (Default is 0)|
+| edges                 | db.Integer              | YES (Default is 0)|
+| has_latlon           | db.Boolean               | YES (Default is False)|
+| has_layer            | db.Boolean               | YES (Default is False)|
 
-### 2. Node 数据模型
-| **字段名称**          | **数据类型**              | **是否必填** |
+### 2. Node
+| **Field Name**          | **Data Type**              | **Required** |
 |-----------------------|---------------------------|--------------|
-| id                    | db.Integer               | 是           |
-| node_id               | db.String(64)            | 是           |
-| name                  | db.String(128)           | 是           |
-| properties            | db.JSON                   | 否           |
-| supply_chain_id      | db.Integer               | 是（外键）   |
+| id                    | db.Integer               | YES (Primary Key)|
+| node_id               | db.String(64)            | YES           |
+| name                  | db.String(128)           | YES           |
+| properties            | db.JSON                   | NO           |
+| supply_chain_id      | db.Integer               | YES (Foreign key)  |
 
 
-### 3. Edge 数据模型
-| **字段名称**          | **数据类型**              | **是否必填** |
+### 3. Edge
+| **Field Name**          | **Data Type**              | **Required** |
 |-----------------------|---------------------------|--------------|
-| id                    | db.Integer               | 是           |
-| edge_id               | db.String(64)            | 是           |
-| source_id             | db.String(64)            | 是           |
-| target_id             | db.String(64)            | 是           |
-| properties            | db.JSON                   | 否           |
-| supply_chain_id      | db.Integer               | 是（外键）   |
-
----
-
-1. 节点
-- `nodeID`，节点ID，必需
-- `name`，节点名称，必需
-- `tier`，节点层级，非必需
-    - 有`tier`属性可以绘制分层网络图
-    - 没有`tier`属性绘制普通的网络图
-- `longitude`，经度，非必需
-- `latitude`，维度，非必需
-    - 有经纬度绘制供应链地图
-    - 没有经纬度则不绘制
-- 其他
-
-
-2. 边
-- `edgeID`，边ID，必需
-- `start`，起始节点ID，必需
-- `end`，末尾节点ID，必需
-- 其他
-
-### 数据管理
-1. 文件上传
-    - 选择供应商信息文件；
-        - 检查文件是否符合数据模型
-    - 选择供应关系信息文件；
-        - 检查文件是否符合数据模型
-    - 检测供应商数据和供应关系数据合法
-2. 创建供应链数据表
-    - 设置供应链名称
-    - 确认新建供应链数据表
-    
-
-
-## 图景可视化
-
-### 网络图
-- 使用必需的数据，可以绘制最基本的网络图
-    - 如果包含每一个点的层级，可以绘制分层网络图
-
-
-### 供应链地图
-- 如果包含每一个点的地理位置，可以绘制供应链地图
+| id                    | db.Integer               | YES (Primary Key)|
+| edge_id               | db.Integer            | YES           |
+| source_id             | db.Integer            | YES           |
+| target_id             | db.Integer            | YES           |
+| properties            | db.JSON               | NO           |
+| supply_chain_id      | db.Integer             | YES (Foreign key) |
