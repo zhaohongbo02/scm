@@ -29,9 +29,9 @@ To ensure that your Python environment is consistent with the project's dependen
 #### 2.1 Create a virtual environment
 
 If you have Python 3 and the venv module installed (most modern versions of Python come with venv), you can create a virtual environment with the following command:
-
+``` sh
 python3 -m venv venv
-
+```
 This will create a virtual environment called venv in the project directory.
 
 #### 2.2 Activate the virtual environment
