@@ -22,32 +22,94 @@ After cloning successfully, enter the project directory:
 cd scm
 ```
 
-### 2. Configure Python virtual environment
+### 2. Configure Python virtual environment (Python 3.8 or 3.9)
 
-To ensure that your Python environment is consistent with the project's dependencies, it is recommended to use a virtual environment. Here are the steps to configure a Python virtual environment:
+To ensure that project dependencies are isolated from the system environment and use a specific version of Python (<b>next take 3.8 as an example, and the same for 3.9</b>), you can choose the following two ways to configure the Python virtual environment:
 
-#### 2.1 Create a virtual environment
+#### 2.1 Create a virtual environment with Python 3.8 (recommended)
 
-If you have Python 3 and the venv module installed (most modern versions of Python come with venv), you can create a virtual environment with the following command:
+If you already have conda or prefer to use conda, see [2.2 Create a Python 3.8 virtual environment using Conda](#conda).
+
+If your system already has Python 3.8 installed, you can create a virtual environment by following the steps below:
+
+1. Install Python 3.8
+
+Make sure you have Python 3.8 installed. If not, download and install Python 3.8 from the official Python website or use your system package manager to install it.
+
+- Linux (Ubuntu/Debian):
 ``` sh
-python3 -m venv venv
+sudo apt-get install python3.8
 ```
-This will create a virtual environment called venv in the project directory.
+- macOS (via Homebrew):
+``` sh
+brew install python@3.8
+```
+- Windows: Download and install directly from the official Python website.
 
-#### 2.2 Activate the virtual environment
+2. Create a Python 3.8 virtual environment
 
-Depending on the operating system you are using, the way to activate the virtual environment varies:
+After the installation is complete, you can use the following command to create a Python 3.8 virtual environment:
 
+- Linux/macOS:
+``` sh
+python3.8 -m venv venv
+```
+- Windows:
+``` sh
+python3.8 -m venv venv
+```
+If the python3.8 command is not available in Windows, you can try using the py command:
+``` sh
+py -3.8 -m venv venv
+```
+3. Activate the virtual environment
+
+After creating the virtual environment, you need to activate it:
+
+- Linux/macOS:
+```
+source venv/bin/activate
+```
 - Windows:
 ``` sh
 .\venv\Scripts\activate
 ```
-- MacOS/Linux:
-``` sh
-source venv/bin/activate
-```
-After activation, the command line prompt will change to show the name of the virtual environment currently in use.
+4. Verify the Python version
 
+After activating the virtual environment, check the Python version to make sure it is 3.8:
+``` sh
+python --version
+```
+If it shows `Python 3.8.x`, it means that you have successfully created and activated a virtual environment based on Python 3.8.
+#### [2.2 Create a Python 3.8 virtual environment using Conda](#conda)
+
+If you are using Conda, you can create a Python 3.8 virtual environment by following these steps:
+
+1. Install Conda
+
+If you don't have Conda installed yet, you can install Conda through Anaconda or Miniconda.
+
+2. Create a Conda environment
+
+To create a Conda environment for Python 3.8, use the following command:
+```sh
+conda create -n myenv python=3.8
+```
+`myenv` is the name you want to give your virtual environment, which can be changed as needed.
+
+3. Activate the Conda environment
+
+After creating the virtual environment in Conda, activate it:
+``` sh
+conda activate myenv
+```
+4. Verify the Python version
+
+Similarly, after activating the virtual environment, verify the Python version using the following command:
+``` sh
+python --version
+```
+If it shows `Python 3.8.x`, the Python version in the Conda environment has been successfully set to 3.8.
 #### 2.3 Install dependencies
 
 After the virtual environment is activated, use the requirements.txt file to install all project dependencies:
