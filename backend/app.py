@@ -1,0 +1,33 @@
+from flask import Flask, jsonify, send_from_directory
+from flask_cors import CORS
+import pandas as pd
+import sys
+import os
+from routes.supplychain import supplychain_bp
+from routes.supplymap import supplymap_bp
+from models import db
+
+
+app = Flask(__name__)
+CORS(app)
+
+# 配置SQLite数据库连接
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///supply_chain.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db.init_app(app)
+with app.app_context():
+    db.create_all()
+
+# 注册蓝图
+app.register_blueprint(supplychain_bp)
+app.register_blueprint(supplymap_bp)
+
+@app.route('/')
+def serve_react():
+    print(app.template_folder)  
+    return send_from_directory(app.template_folder, 'index.html')
+
+if __name__ == '__main__':
+    app.static_folder = 'static/build/static'
+    app.template_folder = 'static/build'
+    app.run(debug=True, use_reloader=False)
