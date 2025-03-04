@@ -4,7 +4,7 @@ import networkx as nx
 import numpy as np
 from models import db, SupplyChain, Node, Edge
 import json
-
+from collections import Counter
 
 supplychain_bp = Blueprint('supplychain', __name__, url_prefix='/api/supplychain')  # 创建蓝图对象
 
@@ -35,11 +35,66 @@ def calculate_centrality(nodes, edges):
         dataNodes["BetweennessCentrality"] = list(map(nx.betweenness_centrality(G).get, dataNodes.nodeID))
         dataNodes["HarmonicCentrality"] = list(map(nx.harmonic_centrality(G).get, dataNodes.nodeID))
         dataNodes['KatzCentrality'] = list(map(nx.katz_centrality(G_d).get, dataNodes.nodeID))
-        dataNodes['EigenvectorCentrality'] = list(map(nx.eigenvector_centrality(G).get, dataNodes.nodeID))
+        # dataNodes['EigenvectorCentrality'] = list(map(nx.eigenvector_centrality(G).get, dataNodes.nodeID))
         dataNodes['CloseCentrality'] = list(map(nx.closeness_centrality(G).get, dataNodes.nodeID))
     except Exception as e:
         print(str(e))
-    return dataNodes.to_dict(orient="records")
+    try:
+        # 计算图形的拓扑属性
+        # 有向图
+        # 度分布
+        DiG_nodes_degrees = Counter(dict(G_d.degree()).values())
+        # print("度分布:", DiG_nodes_degrees)
+        DiG_nodes_degrees_in = Counter(dict(G_d.in_degree()).values())
+        # print("入度分布:", DiG_nodes_degrees_in)
+        DiG_nodes_degrees_out = Counter(dict(G_d.out_degree()).values())
+        # print("出度分布:", DiG_nodes_degrees_out)
+        # 连通性
+        DiG_is_strongly_connected = nx.is_strongly_connected(G_d)
+        DiG_is_weakly_connected = nx.is_weakly_connected(G_d)
+        # print("强连通性:", DiG_is_strongly_connected)
+        # print("弱连通性:", DiG_is_weakly_connected)
+        # 平均最短路径长度
+        if DiG_is_strongly_connected:
+            DiG_avg_shortest_path_length = nx.average_shortest_path_length(G)
+            # print("平均最短路径长度:", DiG_avg_shortest_path_length)
+        else:
+            DiG_avg_shortest_path_length = None
+            # print("平均最短路径长度: 无穷大")
+        # 聚类系数
+        DiG_clustering_coefficients = nx.clustering(G)
+        # print("聚类系数:", np.average(list(dict(DiG_clustering_coefficients).values())))
+        # 网络密度
+        DiG_network_density = nx.density(G)
+        # print("网络密度:", DiG_network_density)
+        
+        # 无向图
+        # 平均最短路径长度
+        if DiG_is_weakly_connected:
+            G_avg_shortest_path_length = nx.average_shortest_path_length(G)
+            # print("平均最短路径长度:", G_avg_shortest_path_length)
+        else:
+            G_avg_shortest_path_length = None
+            # print("平均最短路径长度: 无穷大")
+        # 聚类系数
+        G_clustering_coefficients = nx.clustering(G)
+        # print(dict(G_clustering_coefficients).values())
+        # print("聚类系数:", np.average(list(dict(G_clustering_coefficients).values())))
+    except Exception as e:
+        print(str(e))
+    return dataNodes.to_dict(orient="records"), {
+        'nodes_degrees': DiG_nodes_degrees,
+        'nodes_degrees_in': DiG_nodes_degrees_in,
+        'nodes_degrees_out': DiG_nodes_degrees_out,
+        'strongly_connected': DiG_is_strongly_connected,
+        'weakly_connected': DiG_is_weakly_connected,
+        'DiG_avg_shortest_path_length': DiG_avg_shortest_path_length,
+        'DiG_clustering_coefficients': np.average(list(dict(DiG_clustering_coefficients).values())),
+        'DiG_network_density': DiG_network_density,
+        'G_avg_shortest_path_length': G_avg_shortest_path_length,
+        'G_clustering_coefficients': np.average(list(dict(G_clustering_coefficients).values())),
+        'G_network_density': DiG_network_density * 2
+    }
 
 @supplychain_bp.route('/list', methods=['GET'])
 def getSupplyChainList():
@@ -66,7 +121,8 @@ def createSupplyChain():
     try:
         # 将点和边添加进对应的表
         if nodes is not None and edges is not None:
-            nodes = calculate_centrality(nodes, edges)
+            nodes, supply_chain_properties = calculate_centrality(nodes, edges)
+            # print(nodes)
         if nodes is not None and len(nodes) > 0:
             node_attr = set(nodes[0].keys())
             node_properties = node_attr.difference(set(['name', 'nodeID', 'layer', 'longitude', 'latitude']))
@@ -76,7 +132,7 @@ def createSupplyChain():
                 supply_chain.has_layer = True
             for node in nodes:
                 new_node = Node(name=node['name'], node_id=int(node['nodeID']), supply_chain_id=supply_chain_id)
-                new_node.properties = json.dumps({key: node[key] for key in node_properties})
+                new_node.properties = json.dumps({key: node[key] if key in node else 0 for key in node_properties})
                 if 'longitude' in node_attr:
                     new_node.longitude = node['longitude']
                 if 'latitude' in node_attr:
@@ -93,11 +149,13 @@ def createSupplyChain():
                 db.session.add(new_edge)
         supply_chain.nodes = len(nodes) if nodes is not None else 0
         supply_chain.edges = len(edges) if edges is not None else 0
+        supply_chain.properties = json.dumps(supply_chain_properties)
         db.session.commit()
     except Exception as e:
         db.session.delete(supply_chain)
         db.session.commit()
         print(str(e))
+        print(nodes)
         return jsonify({'status': 'failed', 'error': str(e), 'message': "服务器内部错误！"}),  500
     return jsonify({
         'status': 'success',
@@ -157,7 +215,7 @@ def updateSupplyChain(id):
         db.session.commit()
         # 将新的点和边添加进对应的表
         if nodes is not None and edges is not None:
-            nodes = calculate_centrality(nodes, edges)
+            nodes, supply_chain_properties = calculate_centrality(nodes, edges)
         if nodes is not None and len(nodes) > 0:
             node_attr = set(nodes[0].keys())
             node_properties = node_attr.difference(set(['name', 'nodeID', 'layer', 'longitude', 'latitude']))
@@ -173,7 +231,7 @@ def updateSupplyChain(id):
                     new_node.latitude = node['latitude']
                 if 'layer' in node_attr:
                     new_node.layer = node['layer']
-                new_node.properties = json.dumps({key: node[key] for key in node_properties})
+                new_node.properties = json.dumps({key: node[key] if key in node else 0 for key in node_properties})
                 db.session.add(new_node)
         if edges is not None and len(edges) > 0:
             edge_attr = set(edges[0].keys())
@@ -187,6 +245,7 @@ def updateSupplyChain(id):
                     print(edge)
         supply_chain.nodes = len(nodes) if nodes is not None else 0
         supply_chain.edges = len(edges) if edges is not None else 0
+        supply_chain.properties = json.dumps(supply_chain_properties)
         db.session.commit()
         return jsonify({'status': 'success', 'message': 'Supply chain updated successfully'}), 200
     except Exception as e:

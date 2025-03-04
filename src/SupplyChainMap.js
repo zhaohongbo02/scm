@@ -28,7 +28,7 @@ const SupplyChainMap = ({selectNode, activateKey, setSelectNode}) => {
     // 请求供应链地图图表数据
     const fetchGraphData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:5000/api/map/${selectSupplyChainID}`);
+        const response = await axios.get(`http://127.0.0.1:5000/api/map/graph/${selectSupplyChainID}`);
         const data = await response.data;
         console.log(data);
         if (data.map_graph_data.length === 0) {
@@ -70,13 +70,14 @@ const SupplyChainMap = ({selectNode, activateKey, setSelectNode}) => {
       }
       // 如果上一次选择的供应链id为空或者不为空且与当前id不同，则重新请求图像
       if (lastSupplyChainID && lastSupplyChainID === selectSupplyChainID) {
-        console.log('SupplyChainID未发生变化，不请求新的数据。');
+        console.log('SupplyChainID未发生变化, 不请求新的数据。');
       } else {
         fetchGraphData();
         console.log('supplyChainMap', supplyChainMap);
         console.log('supplyNetwork', supplyNetwork);
         console.log('supplyChainMapDataSourceID', supplyChainMapDataSourceID);
         console.log('supplyNetworkDataSourceID', supplyNetworkDataSourceID);
+        // fectchTopologicalAnalysisData();
       }
       setLastSupplyChainID(selectSupplyChainID);
     }
@@ -441,9 +442,6 @@ const SupplyChainMap = ({selectNode, activateKey, setSelectNode}) => {
           <Button type="primary" onClick={handleClearSelection}  style={{margin: "25px 0px 0px 0px"}}> Clear Selection </Button> 
         </Space>
         </Col>
-        {/* <Col span={4}>
-          <Button type="primary" onClick={handleClearSelection}  style={{margin: "25px 0px 0px 0px"}}> Clear Selection </Button>    
-        </Col> */}
       </Row>
       <Row>
         <Col span={6}>

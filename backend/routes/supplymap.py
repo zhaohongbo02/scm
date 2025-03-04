@@ -55,8 +55,8 @@ def get_supply_map(id, has_latlon, has_layer):
     dataEdges.set_index('edgeID')
     dataNodes['alpha'] = 1.0
     dataEdges['alpha'] = 1.0
-    G_d = nx.from_pandas_edgelist(dataEdges, 'source', 'target', create_using=nx.DiGraph())
-    currentNxGraph = G_d
+    G = nx.from_pandas_edgelist(dataEdges, 'source', 'target', create_using=nx.DiGraph())
+    currentNxGraph = G
     node_radius = 5
     dataEdges.columns = dataEdges.columns.str.replace("source", "start")
     dataEdges.columns = dataEdges.columns.str.replace("target", "end")
@@ -144,10 +144,10 @@ def get_supply_map(id, has_latlon, has_layer):
     network_plot.grid.grid_line_color="gray"
     if has_layer:
         node_attributes = dataNodes.to_dict()['layer']
-        nx.set_node_attributes(G_d, node_attributes, 'layer')
-        network_graph = from_networkx(G_d, nx.multipartite_layout, subset_key='layer', align='horizontal' ,scale=100.0, center=(0, 0))
+        nx.set_node_attributes(G, node_attributes, 'layer')
+        network_graph = from_networkx(G, nx.multipartite_layout, subset_key='layer', align='horizontal' ,scale=100.0, center=(0, 0))
     else:
-        network_graph = from_networkx(G_d, nx.spectral_layout, scale=100.0, center=(0, 0))
+        network_graph = from_networkx(G, nx.spring_layout, scale=100.0, center=(0, 0))
     network_graph.node_renderer.data_source.data = dataNodes
     network_graph.edge_renderer.data_source.data = dataEdges
     network_graph.node_renderer.glyph = Circle(radius=node_radius, radius_units="screen", fill_color='white', line_color='white',fill_alpha='alpha', line_alpha='alpha')
@@ -173,28 +173,21 @@ def get_supply_map(id, has_latlon, has_layer):
     network_plot.renderers.append(network_graph)
     # 绘制网络的度分布图
     # 已知每个点都有Degree属性
-    degree = list(dict(G_d.degree()).values())
-    print(degree)
+    degree = list(dict(G.degree()).values())
     # 绘制bokeh度分布图
     # 绘制度分布图
     hist, edges = np.histogram(degree, bins=10)
     hist = hist / hist.sum()
-    degree_plot = figure( tools="save", background_fill_color="white", width=450, height=400)
+    degree_plot = figure( tools="save", background_fill_color="white", width=350, height=300)
     degree_plot.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="#036564", line_color="#033649")
     degree_plot.y_range.start = 0
     degree_plot.xaxis.axis_label = 'Degree'
     degree_plot.yaxis.axis_label = 'Frequency'
     degree_plot.grid.grid_line_color="gray"
     degree_plot.axis.axis_line_color="black"
-    degree_plot.axis.major_label_text_color="black"
-    degree_plot.axis.major_label_text_font_size="10pt"
-    degree_plot.axis.major_label_text_font_style="bold"
     degree_plot.axis.axis_label_text_color="black"
     degree_plot.axis.axis_label_text_font_size="10pt"
     degree_plot.axis.axis_label_text_font_style="bold"
-    degree_plot.title.text_color="black"
-    degree_plot.title.text_font_size="8pt"
-    degree_plot.title.text_font_style="bold"
     return map_plot, map_graph, network_plot, network_graph, degree_plot
 
 # 点传播算法
@@ -230,7 +223,7 @@ def propagation(graph: nx.DiGraph, ns, direction, max_step=10):
         curr_step += 1
     return nodes
 
-@supplymap_bp.route('/<int:id>', methods=['GET'])
+@supplymap_bp.route('/graph/<int:id>', methods=['GET'])
 def supplymap(id):
     try:
         supply_chain = SupplyChain.query.get(id)
@@ -256,7 +249,6 @@ def supplymap(id):
                     "network_edge_source_id": network_graph.edge_renderer.data_source.id,
                     "degree_plot_data": [degree_plot_data, list(degree_plot_data["doc"]["roots"][0]["attributes"])],})
 
-
 @supplymap_bp.route('/propagation', methods=['POST'])
 def getPropagation():
     nodes = request.json.get("nodes")
@@ -274,3 +266,17 @@ def getPropagation():
             return jsonify({ "nodes": nodes, "statu": "Fail because no Graph" })
     except Exception as err:
         return jsonify({ "nodes": [], "status": "Fail " + str(err)})
+
+
+@supplymap_bp.route('/statistics/<int:id>', methods=['GET'])
+def getStatistics(id):
+    try:
+        supply_chain = SupplyChain.query.get(id)
+    except Exception as e:
+        return jsonify({'status': 'failed', 'error': str(e), 'message': "未找到对应的供应链！"}), 404
+    properties_keys = ['nodes_degrees', 'nodes_degrees_in', 'nodes_degrees_out', 'strongly_connected', 'weakly_connected', 'DiG_avg_shortest_path_length', 'DiG_clustering_coefficients', 'DiG_network_density', 'G_avg_shortest_path_length', 'G_clustering_coefficients', 'G_network_density']
+    supply_chain_properties = {key: supply_chain.to_dict()[key] for key in properties_keys}
+    # 根据供应链的拓扑属性绘制统计图
+    # print(supply_chain_properties)
+    return jsonify({'status': 'success', 'message': '获取统计数据成功！', 'properties': supply_chain_properties})
+

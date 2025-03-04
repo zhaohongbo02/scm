@@ -1,4 +1,4 @@
-export const indicators = ["OutDegreeCentrality", "BetweennessCentrality", "EigenvectorCentrality", "HarmonicCentrality", "CloseCentrality", "KatzCentrality"];
+export const indicators = ["OutDegreeCentrality", "BetweennessCentrality", "HarmonicCentrality", "CloseCentrality", "KatzCentrality"];
 
 export const nodeAttr = [
     {key: "nodeID", type: "int", necessary: true},

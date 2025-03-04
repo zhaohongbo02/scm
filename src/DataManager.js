@@ -30,6 +30,7 @@ const FileUploader = ({attributes, validateHeaders, rowKey, tableData, setTableD
       dataIndex: header,
       key: header,
       width: 100,
+      render: (value) => {if (indicators.includes(header)) return value.toFixed(4); else return value;},
     }));
   };
 
@@ -101,7 +102,6 @@ const FileUploader = ({attributes, validateHeaders, rowKey, tableData, setTableD
         rowKey={rowKey}
         size="small"
         style={{ marginTop: 20 }}
-        // pagination={{ pageSize: 10, }}
         scroll={{ y: 400, x: 100}}
       />
     </div>
@@ -233,10 +233,10 @@ const DataManager = ({ setActivateKey }) => {
     { title: 'Description', dataIndex: 'description', key: 'description', width: 200, ellipsis: true, tooltip: true },
     { title: '# of Nodes', dataIndex: 'nodes', key: 'nodes', width: 150 },
     { title: '# of Edges', dataIndex: 'edges', key: 'edges', width: 150 },
-    { title: 'Has Lat/Lon', dataIndex: 'has_latlon', key: 'has_latlon', width: 150 },
-    { title: 'Has Layer', dataIndex: 'has_layer', key: 'has_layer', width: 150 },
-    { title: 'Create Time', dataIndex: 'created_at', key: 'created_at', width: 180 },
-    { title: 'Update Time', dataIndex: 'updated_at', key: 'updated_at', width: 180 },
+    { title: 'Has Lat/Lon', dataIndex: 'hasLatLon', key: 'hasLatLon', width: 150 },
+    { title: 'Has Layer', dataIndex: 'hasLayer', key: 'hasLayer', width: 150 },
+    { title: 'Create Time', dataIndex: 'createdAt', key: 'createdAt', width: 180 },
+    { title: 'Update Time', dataIndex: 'updatedAt', key: 'updatedAt', width: 180 },
     { title: 'Action', dataIndex: 'action', key: 'action', render: (_, record) => (
       <Space>
         <button onClick={() => onMonitorSupplyChain(record.id)}>
@@ -373,7 +373,7 @@ const DataManager = ({ setActivateKey }) => {
       console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
       console.log(selectedRows[0]);
       setSelectSupplyChainID(selectedRows[0].id);
-      if (selectedRows[0].has_latlon === 'YES') {
+      if (selectedRows[0].hasLatLon === 'YES') {
         mapVisible.current = true;
       } else {
         mapVisible.current = false;
@@ -414,10 +414,10 @@ const DataManager = ({ setActivateKey }) => {
           description: item.description,
           nodes: item.nodes,
           edges: item.edges,
-          has_latlon: (item.has_latlon? 'YES': 'NO'),
-          has_layer: (item.has_layer? 'YES': 'NO'),
-          created_at: new Date(item.created_at).toLocaleString(),
-          updated_at: new Date(item.updated_at).toLocaleString(),
+          hasLatLon: (item.hasLatLon? 'YES': 'NO'),
+          hasLayer: (item.hasLayer? 'YES': 'NO'),
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
         }))}
         rowKey='id'
       />
@@ -449,7 +449,7 @@ const DataManager = ({ setActivateKey }) => {
                 </div>
                   
               }
-              trigger="click"
+              trigger="hover"
             >
               <InfoCircleOutlined/>
             </Popover>
@@ -489,7 +489,7 @@ const DataManager = ({ setActivateKey }) => {
                   ></Table>
                 </div>
               }
-              trigger="click"
+              trigger="hover"
             >
               <InfoCircleOutlined/>
             </Popover>

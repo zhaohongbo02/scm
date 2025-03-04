@@ -21,10 +21,7 @@ const App = () => {
             >
             </SupplyChainMap>
           </Col>
-          <Col span={1}>
-            <Divider type="vertical" style={{height: "100%"}}/>
-          </Col>
-          <Col span={11}>
+          <Col span={12}>
             <h1 style={{margin: "20px 0px 0px 20px"}}> Supplier Information </h1>
             <div id="key supplier select">
               <SupplierTable 

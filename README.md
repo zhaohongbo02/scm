@@ -34,8 +34,6 @@ If your system already has Python 3.8 installed, you can create a virtual enviro
 
 1. Install Python 3.8
 
-Make sure you have Python 3.8 installed. If not, download and install Python 3.8 from the official Python website or use your system package manager to install it.
-
 - Linux (Ubuntu/Debian):
 ``` sh
 sudo apt-get install python3.8
@@ -80,7 +78,9 @@ After activating the virtual environment, check the Python version to make sure 
 ``` sh
 python --version
 ```
+
 If it shows `Python 3.8.x`, it means that you have successfully created and activated a virtual environment based on Python 3.8.
+
 #### [2.2 Create a Python 3.8 virtual environment using Conda](#conda)
 
 If you are using Conda, you can create a Python 3.8 virtual environment by following these steps:
@@ -110,6 +110,7 @@ Similarly, after activating the virtual environment, verify the Python version u
 python --version
 ```
 If it shows `Python 3.8.x`, the Python version in the Conda environment has been successfully set to 3.8.
+
 #### 2.3 Install dependencies
 
 After the virtual environment is activated, use the requirements.txt file to install all project dependencies:
@@ -128,7 +129,7 @@ Once the program is configured, you can start the project with the following ste
 
 ``` sh
 cd backend
-python app.py
+flask run
 ```
 
 #### 3.2 Access the application
@@ -140,7 +141,6 @@ http://127.0.0.1:5000/
 ### 4. Stop the program
 
 If you need to stop the running program, you can press Ctrl + C in the command line to terminate the process.
-
 
 ## Program Framework
 ![image](./figures/scmFramework.png)
