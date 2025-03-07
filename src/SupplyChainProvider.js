@@ -9,7 +9,7 @@ const SupplyChainProvider = ({ children }) => {
   const [supplyRelationData, setSupplyRelationData] = useState([]);
   const [supplyChainMap, setSupplyChainMap] = useState(null);
   const [supplyNetwork, setSupplyNetwork] = useState(null);
-  const [degreeDistribution, setDegreeDistribution] = useState(null);
+  // const [degreeDistribution, setDegreeDistribution] = useState(null);
   const [selectSupplyChainID, setSelectSupplyChainID] = useState(0);
   const [supplyChainMapDoc, setSupplyChainMapDoc] = useState(null);
   const [supplyNetworkDoc, setSupplyNetworkDoc] = useState(null);
@@ -26,7 +26,6 @@ const SupplyChainProvider = ({ children }) => {
             supplyChainMapDoc, setSupplyChainMapDoc,
             supplyNetworkDoc, setSupplyNetworkDoc,
             lastSupplyChainID, setLastSupplyChainID,
-            degreeDistribution, setDegreeDistribution,
             mapVisible }}>
       {children}
     </SupplyChainContext.Provider>

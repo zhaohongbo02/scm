@@ -1,61 +1,70 @@
-import { Table, Select, Card, Space, Divider, Popover, Descriptions, Tag } from "antd";
+import { Table, Select, Card, Space, Divider, Popover, Tag } from "antd";
+import { Histogram } from "@ant-design/charts";
 import { InfoCircleOutlined } from '@ant-design/icons';
 import {indicators, nodeAttr} from "./utils";
 import { useState, useEffect, useContext } from "react";
 import { SupplyChainContext } from "./SupplyChainProvider";
 import axios from "axios";
-import BokehChart from "./BokehChart";
 const { Option } = Select;
 
+const DegreeDistributionCard = ({degreeData}) => {
+  // 转换数据格式
+  const data = degreeData.map((degree) => ({ degree }));
+	console.log(data, data.length);
+
+  // 直方图配置
+  const config = {
+    title: {
+      visible: true,
+      text: '直方图',
+    },
+    description: {
+      visible: true,
+      text: '通过设置binNumber进行分箱\uFF0CbinNumber决定直方图分箱的区域\u3002',
+    },
+    forceFit: true,
+    data,
+    padding: 'auto',
+    binField: 'degree',
+		binNumber: 10,
+    color: '#1079a0',
+  };
+
+  return (
+    <div>
+			<Histogram {...config} />
+		</div>
+  );
+};
+
 const TopologyInfo = ({topologyData}) => {
-		// 将对象转换为表格数据
-	const formatTableData = (data) =>
-		Object.keys(data).map((key) => ({
-			key,
-			degree: key,
-			count: data[key],
-	}));
-
-	const columns = [
-		{
-			title: "Degree",
-			dataIndex: "degree",
-			key: "degree",
-		},
-		{
-			title: "Count",
-			dataIndex: "count",
-			key: "count",
-		},
+	// 网络整体特性数据
+	const networkProperties = Object.keys(topologyData).length === 0 ? [] : [
+			{
+					key: "DiG",
+					type: <b>Directed</b>,
+					avgShortestPath: topologyData.DiG_avg_shortest_path_length ?? "N/A",
+					clusteringCoefficient: topologyData.DiG_clustering_coefficients,
+					networkDensity: topologyData.DiG_network_density.toFixed(5),
+					connected: (
+							<Tag color={topologyData.strongly_connected ? "green" : "red"}>
+							{topologyData.strongly_connected ? "是" : "否"}
+							</Tag>
+					)
+			},
+			{
+					key: "G",
+					type: <b>Undirected</b>,
+					avgShortestPath: topologyData.G_avg_shortest_path_length ?? "N/A",
+					clusteringCoefficient: topologyData.G_clustering_coefficients,
+					networkDensity: topologyData.G_network_density.toFixed(5),
+					connected: (
+							<Tag color={topologyData.weakly_connected ? "green" : "red"}>
+							{topologyData.weakly_connected ? "是" : "否"}
+							</Tag>
+					)
+			},
 	];
-
-		// 网络整体特性数据
-		const networkProperties = Object.keys(topologyData).length === 0 ? [] : [
-				{
-						key: "DiG",
-						type: <b>Directed</b>,
-						avgShortestPath: topologyData.DiG_avg_shortest_path_length ?? "N/A",
-						clusteringCoefficient: topologyData.DiG_clustering_coefficients,
-						networkDensity: topologyData.DiG_network_density.toFixed(5),
-						connected: (
-								<Tag color={topologyData.strongly_connected ? "green" : "red"}>
-								{topologyData.strongly_connected ? "是" : "否"}
-								</Tag>
-						)
-				},
-				{
-						key: "G",
-						type: <b>Undirected</b>,
-						avgShortestPath: topologyData.G_avg_shortest_path_length ?? "N/A",
-						clusteringCoefficient: topologyData.G_clustering_coefficients,
-						networkDensity: topologyData.G_network_density.toFixed(5),
-						connected: (
-								<Tag color={topologyData.weakly_connected ? "green" : "red"}>
-								{topologyData.weakly_connected ? "是" : "否"}
-								</Tag>
-						)
-				},
-		];
 
 		// 表头定义
 		const networkColumns = [
@@ -96,38 +105,23 @@ const TopologyInfo = ({topologyData}) => {
 						{Object.keys(topologyData).length === 0 ? (
 							<div></div>
 						) : (
-								<div>
-						<Table
-								title={() => <b>Network Metrics</b>}
-								dataSource={networkProperties}
-								columns={networkColumns}
-								pagination={false}
-								bordered
-						/>
-						<Card title="Node Degree Distribution" style={{ marginTop: 16 }}>
-								<Table
-										dataSource={formatTableData(topologyData.nodes_degrees)}
-										columns={columns}
-										pagination={false}
-										scroll={{ y: 200 }}
-								/>
-						</Card>
-						<Card title="Node In-Degree Distribution" style={{ marginTop: 16 }}>
-								<Table
-										dataSource={formatTableData(topologyData.nodes_degrees_in)}
-										columns={columns}
-										pagination={false}
-										scroll={{ y: 200 }}
-								/>
-						</Card>
-						<Card title="Node Out-Degree Distribution" style={{ marginTop: 16 }}>
-								<Table
-										dataSource={formatTableData(topologyData.nodes_degrees_out)}
-										columns={columns}
-										pagination={false}
-										scroll={{ y: 200 }}
-								/>
-						</Card>
+						<div>
+							<Table
+									title={() => <b>Network Metrics</b>}
+									dataSource={networkProperties}
+									columns={networkColumns}
+									pagination={false}
+									bordered
+							/>
+							<Card title="Node Degree Distribution" style={{width: "100%"}}> 
+								<DegreeDistributionCard degreeData={topologyData.nodes_degrees}/>
+							</Card>
+							<Card title="Node In-Degree Distribution" style={{width: "100%"}}> 
+								<DegreeDistributionCard degreeData={topologyData.nodes_degrees_in}/>
+							</Card>
+							<Card title="Node Out-Degree Distribution" style={{width: "100%"}}> 
+								<DegreeDistributionCard degreeData={topologyData.nodes_degrees_out}/>
+							</Card>
 						</div>
 			)}
 		</Card>
@@ -144,7 +138,7 @@ const SupplierTable = ({ setSelectNode, activateKey }) => {
 
 		const { supplierData, setSupplierData, setSupplyRelationData,
 						selectSupplyChainID,
-						lastSupplyChainID, degreeDistribution } = useContext(SupplyChainContext);
+						lastSupplyChainID } = useContext(SupplyChainContext);
 
 
 			useEffect(() => {
@@ -286,13 +280,6 @@ const SupplierTable = ({ setSelectNode, activateKey }) => {
 										/>
 								</div>
 								<Divider />
-								<Space>
-										<Card title="Degree Distribution" style={{ width: 400 }}>
-												<BokehChart
-														chart_id='degree_distribution'
-														bokehModel={degreeDistribution}/>
-										</Card>
-								</Space>
 								<TopologyInfo topologyData={topologyData} />
 						</Space>
 				</div>

@@ -27,7 +27,6 @@ class SupplyChain(db.Model):
 			'edges': self.edges,
 			'hasLatLon': self.has_latlon,
 			'hasLayer': self.has_layer}
-		print(self.properties)
 		properties = json.loads(self.properties)
 		supply_chain_dict.update(properties)
 		return supply_chain_dict

@@ -24,6 +24,6 @@ def serve_react():
 	return send_from_directory(app.template_folder, 'index.html')
 
 if __name__ == '__main__':
-	# app.static_folder = 'static/build/static', 
-	# app.template_folder='static/build'    
-	app.run(debug=True, use_reloader=False)
+	app.static_folder = 'static/build/static', 
+	app.template_folder='static/build'    
+	app.run(debug=False, use_reloader=False)

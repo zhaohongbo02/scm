@@ -171,24 +171,7 @@ def get_supply_map(id, has_latlon, has_layer):
         """)
     network_graph.node_renderer.data_source.selected.js_on_change("indices", network_select_callback)
     network_plot.renderers.append(network_graph)
-    # 绘制网络的度分布图
-    # 已知每个点都有Degree属性
-    degree = list(dict(G.degree()).values())
-    # 绘制bokeh度分布图
-    # 绘制度分布图
-    hist, edges = np.histogram(degree, bins=10)
-    hist = hist / hist.sum()
-    degree_plot = figure( tools="save", background_fill_color="white", width=350, height=300)
-    degree_plot.quad(top=hist, bottom=0, left=edges[:-1], right=edges[1:], fill_color="#036564", line_color="#033649")
-    degree_plot.y_range.start = 0
-    degree_plot.xaxis.axis_label = 'Degree'
-    degree_plot.yaxis.axis_label = 'Frequency'
-    degree_plot.grid.grid_line_color="gray"
-    degree_plot.axis.axis_line_color="black"
-    degree_plot.axis.axis_label_text_color="black"
-    degree_plot.axis.axis_label_text_font_size="10pt"
-    degree_plot.axis.axis_label_text_font_style="bold"
-    return map_plot, map_graph, network_plot, network_graph, degree_plot
+    return map_plot, map_graph, network_plot, network_graph
 
 # 点传播算法
 def propagation(graph: nx.DiGraph, ns, direction, max_step=10):
@@ -229,7 +212,7 @@ def supplymap(id):
         supply_chain = SupplyChain.query.get(id)
     except Exception as e:
         return jsonify({'status': 'failed', 'error': str(e), 'message': "未找到对应的供应链！"}), 404
-    map_plot, map_graph, network_plot, network_graph, degree_plot = get_supply_map(id, supply_chain.has_latlon, supply_chain.has_layer)
+    map_plot, map_graph, network_plot, network_graph = get_supply_map(id, supply_chain.has_latlon, supply_chain.has_layer)
     if map_plot is not None:
         map_graph_data = json_item(map_plot, "supplychainmap")
         map_graph_data = [map_graph_data, list(map_graph_data["doc"]["roots"][0]["attributes"])]
@@ -240,14 +223,12 @@ def supplymap(id):
         map_node_source_id = ''
         map_edge_source_id = ''
     network_graph_data = json_item(network_plot, "supplynetwork")
-    degree_plot_data = json_item(degree_plot, "degree_distribution")
     return jsonify({"map_graph_data": map_graph_data,
                     "map_node_source_id": map_node_source_id, 
                     "map_edge_source_id": map_edge_source_id,
                     "network_graph_data": [network_graph_data, list(network_graph_data["doc"]["roots"][0]["attributes"])],
                     "network_node_source_id": network_graph.node_renderer.data_source.id, 
-                    "network_edge_source_id": network_graph.edge_renderer.data_source.id,
-                    "degree_plot_data": [degree_plot_data, list(degree_plot_data["doc"]["roots"][0]["attributes"])],})
+                    "network_edge_source_id": network_graph.edge_renderer.data_source.id,})
 
 @supplymap_bp.route('/propagation', methods=['POST'])
 def getPropagation():

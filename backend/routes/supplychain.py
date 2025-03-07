@@ -4,7 +4,6 @@ import networkx as nx
 import numpy as np
 from models import db, SupplyChain, Node, Edge
 import json
-from collections import Counter
 
 supplychain_bp = Blueprint('supplychain', __name__, url_prefix='/api/supplychain')  # 创建蓝图对象
 
@@ -43,11 +42,11 @@ def calculate_centrality(nodes, edges):
         # 计算图形的拓扑属性
         # 有向图
         # 度分布
-        DiG_nodes_degrees = Counter(dict(G_d.degree()).values())
+        DiG_nodes_degrees = list(dict(G_d.degree()).values())
         # print("度分布:", DiG_nodes_degrees)
-        DiG_nodes_degrees_in = Counter(dict(G_d.in_degree()).values())
+        DiG_nodes_degrees_in = list(dict(G_d.in_degree()).values())
         # print("入度分布:", DiG_nodes_degrees_in)
-        DiG_nodes_degrees_out = Counter(dict(G_d.out_degree()).values())
+        DiG_nodes_degrees_out = list(dict(G_d.out_degree()).values())
         # print("出度分布:", DiG_nodes_degrees_out)
         # 连通性
         DiG_is_strongly_connected = nx.is_strongly_connected(G_d)
@@ -56,16 +55,16 @@ def calculate_centrality(nodes, edges):
         # print("弱连通性:", DiG_is_weakly_connected)
         # 平均最短路径长度
         if DiG_is_strongly_connected:
-            DiG_avg_shortest_path_length = nx.average_shortest_path_length(G)
+            DiG_avg_shortest_path_length = nx.average_shortest_path_length(G_d)
             # print("平均最短路径长度:", DiG_avg_shortest_path_length)
         else:
             DiG_avg_shortest_path_length = None
             # print("平均最短路径长度: 无穷大")
         # 聚类系数
-        DiG_clustering_coefficients = nx.clustering(G)
+        DiG_clustering_coefficients = nx.clustering(G_d)
         # print("聚类系数:", np.average(list(dict(DiG_clustering_coefficients).values())))
         # 网络密度
-        DiG_network_density = nx.density(G)
+        DiG_network_density = nx.density(G_d)
         # print("网络密度:", DiG_network_density)
         
         # 无向图

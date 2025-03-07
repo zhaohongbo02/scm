@@ -21,7 +21,7 @@ const SupplyChainMap = ({selectNode, activateKey, setSelectNode}) => {
           supplyNetwork, setSupplyNetwork,
           supplierData,
           lastSupplyChainID, setLastSupplyChainID,
-          setDegreeDistribution, mapVisible
+          mapVisible
         } = useContext(SupplyChainContext);
 
   useEffect(() => {
@@ -52,7 +52,6 @@ const SupplyChainMap = ({selectNode, activateKey, setSelectNode}) => {
           edge_source_id: data.network_edge_source_id
         };
         setSupplyNetwork(data.network_graph_data);
-        setDegreeDistribution(data.degree_plot_data);
         console.log("Success fetching Bokeh plot");
       } catch (error) {
         console.error("Error fetching Bokeh plot:", error);
