@@ -48,7 +48,7 @@ const TopologyInfo = ({topologyData}) => {
 					networkDensity: topologyData.DiG_network_density.toFixed(5),
 					connected: (
 							<Tag color={topologyData.strongly_connected ? "green" : "red"}>
-							{topologyData.strongly_connected ? "是" : "否"}
+							{topologyData.strongly_connected ? "YES" : "NO"}
 							</Tag>
 					)
 			},
@@ -60,7 +60,7 @@ const TopologyInfo = ({topologyData}) => {
 					networkDensity: topologyData.G_network_density.toFixed(5),
 					connected: (
 							<Tag color={topologyData.weakly_connected ? "green" : "red"}>
-							{topologyData.weakly_connected ? "是" : "否"}
+							{topologyData.weakly_connected ? "YES" : "NO"}
 							</Tag>
 					)
 			},
