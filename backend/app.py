@@ -5,7 +5,7 @@ from routes.supplymap import supplymap_bp
 from models import db
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder = 'static/build/static', template_folder='static/build')
 CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000"]}})
 
 # 配置SQLite数据库连接
@@ -23,7 +23,5 @@ app.register_blueprint(supplymap_bp)
 def serve_react():
 	return send_from_directory(app.template_folder, 'index.html')
 
-if __name__ == '__main__':
-	app.static_folder = 'static/build/static', 
-	app.template_folder='static/build'    
+if __name__ == '__main__':   
 	app.run(debug=False, use_reloader=False)
