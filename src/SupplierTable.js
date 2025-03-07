@@ -19,8 +19,7 @@ const DegreeDistributionCard = ({degreeData}) => {
       text: '直方图',
     },
     description: {
-      visible: true,
-      text: '通过设置binNumber进行分箱\uFF0CbinNumber决定直方图分箱的区域\u3002',
+      visible: false,
     },
     forceFit: true,
     data,
