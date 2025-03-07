@@ -1,13 +1,13 @@
 import pandas as pd
 import networkx as nx
 import numpy as np
-from bokeh.plotting import figure, from_networkx, show
+from bokeh.plotting import figure, from_networkx
 from bokeh.models.glyphs import Circle, MultiLine
 from bokeh.models import StaticLayoutProvider, GraphRenderer, CustomJS, NodesAndLinkedEdges
 from flask import Blueprint
 from flask import jsonify, request
 from bokeh.embed import json_item
-from models import SupplyChain, Node, Edge, db
+from models import SupplyChain, Node, Edge
 import xyzservices.providers as xyz
 
 supplymap_bp = Blueprint('supplymap', __name__, url_prefix='/api/map')  # 创建蓝图对象
