@@ -140,53 +140,53 @@ const SupplierTable = ({ setSelectNode, activateKey }) => {
 						lastSupplyChainID } = useContext(SupplyChainContext);
 
 
-			useEffect(() => {
-				// 请求供应链地图图表数据
-				const fetchSupplierData = async () => {
-					try {
-						const response = await axios.get(`http://127.0.0.1:5000/api/supplychain/${selectSupplyChainID}`);
-						if (response.data.status === 'success') {
-								console.log(response.data.nodes);
-								console.log(response.data.edges);
-								setSupplierData(response.data.nodes);
-								setSupplyRelationData(response.data.edges);
-								// 获取indicators和noders中中心度指标的交集
-								let newIndicators = [];
-								for (const indicator of indicators) {
-										if (Object.keys(response.data.nodes[0]).includes(indicator)) {
-												newIndicators.push(indicator);
-										}
-								}
-								setValidateIndicators(newIndicators);
-								console.log("Success fetching Supply Chain data!");
-						}
-					} catch (error) {
-						console.error("Error fetching Supply Chain data:", error);
+	useEffect(() => {
+		// 请求供应链地图图表数据
+		const fetchSupplierData = async () => {
+			try {
+				const response = await axios.get(`http://127.0.0.1:5000/api/supplychain/${selectSupplyChainID}`);
+				if (response.data.status === 'success') {
+					console.log(response.data.nodes);
+					console.log(response.data.edges);
+					setSupplierData(response.data.nodes);
+					setSupplyRelationData(response.data.edges);
+					// 获取indicators和noders中中心度指标的交集
+					let newIndicators = [];
+					for (const indicator of indicators) {
+							if (Object.keys(response.data.nodes[0]).includes(indicator)) {
+									newIndicators.push(indicator);
+							}
 					}
-				};
-
-				const fectchTopologicalAnalysisData = async () => {
-						try {
-								const response = await axios.get(`http://127.0.0.1:5000/api/map/statistics/${selectSupplyChainID}`);
-								const data = await response.data;
-								console.log(data);
-								setTopologyData(data.properties);
-								console.log("Success fetching Topological Analysis Data!", topologyData);
-						} catch (error) {
-							console.error("Error fetching Topological Analysis Data:", error);
-						}
-					};
-
-				if (activateKey === "1") {
-					// 如果上一次选择的供应链id为空或者不为空且与当前id不同，则重新请求数据
-					if (lastSupplyChainID && lastSupplyChainID === selectSupplyChainID) {
-						console.log('SupplyChainID未发生变化, 不请求新的数据。');
-					} else {
-						fetchSupplierData();
-						fectchTopologicalAnalysisData();
-					}
+					setValidateIndicators(newIndicators);
+					console.log("Success fetching Supply Chain data!");
 				}
-			}, [activateKey, selectSupplyChainID, lastSupplyChainID, setSupplierData, setSupplyRelationData]);
+			} catch (error) {
+				console.error("Error fetching Supply Chain data:", error);
+			}
+		};
+
+	const fectchTopologicalAnalysisData = async () => {
+		try {
+			const response = await axios.get(`http://127.0.0.1:5000/api/map/statistics/${selectSupplyChainID}`);
+			const data = await response.data;
+			console.log(data);
+			setTopologyData(data.properties);
+			console.log("Success fetching Topological Analysis Data!", topologyData);
+		} catch (error) {
+			console.error("Error fetching Topological Analysis Data:", error);
+		}
+		};
+
+		if (activateKey === "1") {
+			// 如果上一次选择的供应链id为空或者不为空且与当前id不同，则重新请求数据
+			if (lastSupplyChainID && lastSupplyChainID === selectSupplyChainID) {
+				console.log('SupplyChainID未发生变化, 不请求新的数据。');
+			} else {
+				fetchSupplierData();
+				fectchTopologicalAnalysisData();
+			}
+		}
+	}, [activateKey, selectSupplyChainID, lastSupplyChainID, setSupplierData, setSupplyRelationData]);
 
 		const handleIndicatorSelectChange = (value) => {
 				// 设置排序指标为对应位置的英文指标
@@ -238,51 +238,51 @@ const SupplierTable = ({ setSelectNode, activateKey }) => {
 				return columns;
 		};
 
-		return (
-			 <div className="SupplierTable" >
-						<br />
-						<Space direction="vertical" style={{width: "100%", overflowX: "auto"}}>
-								<Space direction="horizontal">
-										<b> Node Centrality Indicator </b>
-										<Select
-												defaultValue={validateIndicators[0]}
-												style={{ width: 250 }}
-												onChange={handleIndicatorSelectChange} >
-												{validateIndicators.map((item) => (
-														<Option key={item} value={item}>
-																<Space>
-																		<p>{item}</p>
-																<Popover
-																		content={item}
-																		title="Indicator Description"
-																		trigger="hover"
-																>
-																		<InfoCircleOutlined/>
-																</Popover>
-																</Space>
-														</Option>
-												))}
-										</Select>
+	return (
+		<div className="SupplierTable" >
+			<br />
+			<Space direction="vertical" style={{width: "100%", overflowX: "auto"}}>
+				<Space direction="horizontal">
+					<b> Node Centrality Indicator </b>
+					<Select
+						defaultValue={validateIndicators[0]}
+						style={{ width: 250 }}
+						onChange={handleIndicatorSelectChange} >
+						{validateIndicators.map((item) => (
+							<Option key={item} value={item}>
+								<Space>
+									<p>{item}</p>
+								<Popover
+									content={item}
+									title="Indicator Description"
+									trigger="hover"
+								>
+									<InfoCircleOutlined/>
+								</Popover>
 								</Space>
-								<div>
-										<Table
-												dataSource={supplierData}
-												bordered={true}
-												columns={generateColumns(supplierData.length > 0 ? Object.keys(supplierData[0]) : [])}
-												rowKey="nodeID"
-												rowSelection={rowSelection}
-												size="middle"
-												pagination={{
-														pageSize: 50,
-												}}
-												scroll={{ y: 500, x: 'max-content' }}
-										/>
-								</div>
-								<Divider />
-								<TopologyInfo topologyData={topologyData} />
-						</Space>
+							</Option>
+						))}
+					</Select>
+				</Space>
+				<div>
+					<Table
+						dataSource={supplierData}
+						bordered={true}
+						columns={generateColumns(supplierData.length > 0 ? Object.keys(supplierData[0]) : [])}
+						rowKey="nodeID"
+						rowSelection={rowSelection}
+						size="middle"
+						pagination={{
+							pageSize: 50,
+						}}
+						scroll={{ y: 500, x: 'max-content' }}
+					/>
 				</div>
-		);
+				<Divider />
+				<TopologyInfo topologyData={topologyData} />
+			</Space>
+		</div>
+	);
 };
 
 export default SupplierTable;
